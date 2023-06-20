@@ -7,6 +7,9 @@ export default {
     findAllPage: (urlDestination = 'amostras/page') => {
         return http.get(urlDestination);
     },
+    findSearchPage: (urlDestination = 'amostras/page/busca', samples) => {
+        return http.post(urlDestination, samples);
+    },
     deleteSample: (sample, token) => {
         return http.delete(`amostras/${sample._id}`,
             {

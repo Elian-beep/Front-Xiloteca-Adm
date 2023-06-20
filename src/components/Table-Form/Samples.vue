@@ -152,8 +152,8 @@ export default defineComponent({
         obs: "",
       },
       samples: [],
+      sampleSearched: [],
       modeSearch: false,
-      cloneSamples: [],
       tableIsOpen: false,
       pages: {
         previousPage: "",
@@ -164,11 +164,11 @@ export default defineComponent({
       },
       dataOpenTable: true,
       currentPage: 1,
-      samplesForPage: 70,
       openModal: false,
       openModalDel: false,
       opcInput: "",
       searchInput: "",
+      cloneSamples: [],
     };
   },
   mounted() {
@@ -176,12 +176,6 @@ export default defineComponent({
     this.listAllPage();
   },
   computed: {
-    SlicedSamples() {
-      return this.samples.slice(
-        (this.currentPage - 1) * this.samplesForPage,
-        this.currentPage * this.samplesForPage
-      );
-    },
     totalPages() {
       // return Math.ceil(this.samples.length / this.samplesForPage);
       return Math.ceil(this.pages.totalSamples / this.pages.limit);
@@ -231,7 +225,6 @@ export default defineComponent({
     },
     listAllPage() {
       Samples.findAllPage().then((response) => {
-        console.log(response.data);
         this.samples = response.data.results;
         this.pages.totalSamples = response.data.total;
         this.pages.offset = response.data.offset;
@@ -240,16 +233,39 @@ export default defineComponent({
         this.pages.nextPage = response.data.nextUrl;
         this.tableIsOpen = true;
         this.currentPage = 1;
+        this.modeSearch = false;
       });
     },
-    searchSample() {
-      this.currentPage = 1;
-      this.samples = this.cloneSamples;
-      this.samples = SearchSample.search(
+    async searchSample() {
+      let allSamples = [];
+      await Samples.listAll().then((response) =>
+        response.data.map((sample) => allSamples.push(sample))
+      );
+      this.sampleSearched = SearchSample.search(
         this.searchInput,
-        this.samples,
+        allSamples,
         this.opcInput
       );
+      console.log(this.sampleSearched);
+      Samples.findSearchPage("amostras/page/busca", this.sampleSearched).then(
+        (response) => {
+          this.samples = response.data.results;
+          this.pages.totalSamples = response.data.total;
+          this.pages.offset = response.data.offset;
+          this.pages.previousPage = response.data.previousUrl;
+          this.pages.nextPage = response.data.nextUrl;
+        }
+      );
+      this.currentPage = 1;
+      this.modeSearch = true;
+
+      // this.currentPage = 1;
+      // this.samples = this.cloneSamples;
+      // this.samples = SearchSample.search(
+      //   this.searchInput,
+      //   this.samples,
+      //   this.opcInput
+      // );
     },
     sendEditSample(sample) {
       this.sample = sample;
@@ -266,14 +282,27 @@ export default defineComponent({
       //   this.currentPage++;
       // }
       if (this.pages.nextPage) {
-        Samples.findAllPage(this.pages.nextPage).then((response) => {
-          this.samples = response.data.results;
+        if (!this.modeSearch) {
+          Samples.findAllPage(this.pages.nextPage).then((response) => {
+            this.samples = response.data.results;
             this.pages.totalSamples = response.data.total;
             this.pages.offset = response.data.offset;
             this.pages.previousPage = response.data.previousUrl;
             this.pages.nextPage = response.data.nextUrl;
             this.currentPage = this.pages.offset / this.pages.limit + 1;
-        });
+          });
+        } else {
+          Samples.findSearchPage(this.pages.nextPage, this.sampleSearched).then(
+            (response) => {
+              this.samples = response.data.results;
+              this.pages.totalSamples = response.data.total;
+              this.pages.offset = response.data.offset;
+              this.pages.previousPage = response.data.previousUrl;
+              this.pages.nextPage = response.data.nextUrl;
+              this.currentPage = this.pages.offset / this.pages.limit + 1;
+            }
+          );
+        }
       }
     },
     previousPage() {
@@ -281,30 +310,49 @@ export default defineComponent({
       //   this.currentPage--;
       // }
       if (this.pages.previousPage) {
-        Samples.findAllPage(this.pages.previousPage).then((response) => {
-          this.samples = response.data.results;
+        if(!this.modeSearch){
+          Samples.findAllPage(this.pages.previousPage).then((response) => {
+            this.samples = response.data.results;
             this.pages.totalSamples = response.data.total;
             this.pages.offset = response.data.offset;
             this.pages.previousPage = response.data.previousUrl;
             this.pages.nextPage = response.data.nextUrl;
             this.currentPage = this.pages.offset / this.pages.limit + 1;
-        });
+          });
+        }else{
+          Samples.findSearchPage(this.pages.previousPage, this.sampleSearched).then(
+            (response) => {
+              this.samples = response.data.results;
+              this.pages.totalSamples = response.data.total;
+              this.pages.offset = response.data.offset;
+              this.pages.previousPage = response.data.previousUrl;
+              this.pages.nextPage = response.data.nextUrl;
+              this.currentPage = this.pages.offset / this.pages.limit + 1;
+            }
+          );
+        }
       }
     },
     async goToPage(page) {
       // if (page != "..") this.currentPage = page;
-      if(page != ".."){
-        this.pages.offset = (page-1) * this.pages.limit;
-        const urlBusca = this.modeSearch ? '/busca' : '';
+      if (page != "..") {
+        this.pages.offset = (page - 1) * this.pages.limit;
+        const urlBusca = this.modeSearch ? "/busca" : "";
         const urlPage = `/amostras/page${urlBusca}?limit=${this.pages.limit}&offset=${this.pages.offset}`;
-        if(!this.modeSearch){
-          await Samples.findAllPage(urlPage).then(response => {
+        if (!this.modeSearch) {
+          Samples.findAllPage(urlPage).then((response) => {
             this.samples = response.data.results;
             this.pages.previousPage = response.data.previousUrl;
             this.pages.nextPage = response.data.nextUrl;
           });
+        }else{
+          Samples.findSearchPage(urlPage, this.sampleSearched).then(response => {
+            this.samples = response.data.results;
+            this.pages.previousPage = response.data.previousUrl;
+            this.pages.nextPage = response.data.nextUrl;
+          })
         }
-        this.currentPage = page
+        this.currentPage = page;
       }
     },
     openModalSample(sample) {
