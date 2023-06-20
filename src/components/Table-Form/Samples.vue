@@ -224,6 +224,7 @@ export default defineComponent({
       });
     },
     listAllPage() {
+      this.tableIsOpen = false;
       Samples.findAllPage().then((response) => {
         this.samples = response.data.results;
         this.pages.totalSamples = response.data.total;
@@ -238,6 +239,7 @@ export default defineComponent({
     },
     async searchSample() {
       let allSamples = [];
+      this.tableIsOpen = false;
       await Samples.listAll().then((response) =>
         response.data.map((sample) => allSamples.push(sample))
       );
@@ -254,6 +256,7 @@ export default defineComponent({
           this.pages.offset = response.data.offset;
           this.pages.previousPage = response.data.previousUrl;
           this.pages.nextPage = response.data.nextUrl;
+          this.tableIsOpen = true;
         }
       );
       this.currentPage = 1;
@@ -282,6 +285,7 @@ export default defineComponent({
       //   this.currentPage++;
       // }
       if (this.pages.nextPage) {
+        this.tableIsOpen = false;
         if (!this.modeSearch) {
           Samples.findAllPage(this.pages.nextPage).then((response) => {
             this.samples = response.data.results;
@@ -290,6 +294,7 @@ export default defineComponent({
             this.pages.previousPage = response.data.previousUrl;
             this.pages.nextPage = response.data.nextUrl;
             this.currentPage = this.pages.offset / this.pages.limit + 1;
+            this.tableIsOpen = true;
           });
         } else {
           Samples.findSearchPage(this.pages.nextPage, this.sampleSearched).then(
@@ -300,6 +305,7 @@ export default defineComponent({
               this.pages.previousPage = response.data.previousUrl;
               this.pages.nextPage = response.data.nextUrl;
               this.currentPage = this.pages.offset / this.pages.limit + 1;
+              this.tableIsOpen = true;
             }
           );
         }
@@ -310,6 +316,7 @@ export default defineComponent({
       //   this.currentPage--;
       // }
       if (this.pages.previousPage) {
+        this.tableIsOpen = false;
         if(!this.modeSearch){
           Samples.findAllPage(this.pages.previousPage).then((response) => {
             this.samples = response.data.results;
@@ -318,6 +325,7 @@ export default defineComponent({
             this.pages.previousPage = response.data.previousUrl;
             this.pages.nextPage = response.data.nextUrl;
             this.currentPage = this.pages.offset / this.pages.limit + 1;
+            this.tableIsOpen = true;
           });
         }else{
           Samples.findSearchPage(this.pages.previousPage, this.sampleSearched).then(
@@ -328,6 +336,7 @@ export default defineComponent({
               this.pages.previousPage = response.data.previousUrl;
               this.pages.nextPage = response.data.nextUrl;
               this.currentPage = this.pages.offset / this.pages.limit + 1;
+              this.tableIsOpen = true;
             }
           );
         }
@@ -336,6 +345,7 @@ export default defineComponent({
     async goToPage(page) {
       // if (page != "..") this.currentPage = page;
       if (page != "..") {
+        this.tableIsOpen = false;
         this.pages.offset = (page - 1) * this.pages.limit;
         const urlBusca = this.modeSearch ? "/busca" : "";
         const urlPage = `/amostras/page${urlBusca}?limit=${this.pages.limit}&offset=${this.pages.offset}`;
@@ -344,15 +354,17 @@ export default defineComponent({
             this.samples = response.data.results;
             this.pages.previousPage = response.data.previousUrl;
             this.pages.nextPage = response.data.nextUrl;
+            this.tableIsOpen = true;
           });
         }else{
           Samples.findSearchPage(urlPage, this.sampleSearched).then(response => {
             this.samples = response.data.results;
             this.pages.previousPage = response.data.previousUrl;
             this.pages.nextPage = response.data.nextUrl;
+            this.currentPage = page;
+            this.tableIsOpen = true;
           })
         }
-        this.currentPage = page;
       }
     },
     openModalSample(sample) {
