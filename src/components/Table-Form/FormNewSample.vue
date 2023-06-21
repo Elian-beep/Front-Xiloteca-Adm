@@ -185,7 +185,15 @@
         <button type="button" class="btn-clear" @click="ClearInpts">
           Limpar tudo
         </button>
-        <ButtonLarge>{{ btnText }}</ButtonLarge>
+        <ButtonLarge>
+          <div class="content-btnSave">
+            {{ btnText }}
+            <div
+              class="custom-loader"
+              :class="{ closeLoaderSave: closeLoaderSave }"
+            ></div>
+          </div>
+        </ButtonLarge>
       </div>
     </form>
   </section>
@@ -238,6 +246,7 @@ export default defineComponent({
       pictures: [],
       dataBlockInputs: false,
       dataOpenForm: false,
+      closeLoaderSave: true,
       isEdition: false,
       isSave: true,
       errorForm: false,
@@ -256,12 +265,14 @@ export default defineComponent({
         this.PopulatePictures();
         if (!this.isEdition && this.isSave) {
           this.sample.cod = this.sample.cod.toUpperCase();
+          this.closeLoaderSave = false;
           Samples.saveSample(this.sample, this.token)
             .then((response) => {
               this.activeAlert = true;
               this.msgAlert = "Cadastrado com sucesso";
-              this.pictures = [{ linkDrive: "", tituloLink: "" }];
+              this.pictures = [];
               this.colorAlert = "#8ad547";
+              this.closeLoaderSave = true;
               this.sample = {};
               console.log(`${response.data} cadastrado com sucesso`);
             })
@@ -274,14 +285,17 @@ export default defineComponent({
               console.log(`${e.response.data}`);
             });
         } else if (this.isEdition) {
+          this.closeLoaderSave = false;
           Samples.editSample(this.sample, this.token).then((response) => {
             console.log({ res: response.data });
+            this.closeLoaderSave = true;
             this.ClearInpts();
           });
         }
         if (!this.isSave) {
           this.isSave = true;
         }
+        // desligar o loading de salvando
       } else {
         this.errorForm = true;
       }
@@ -295,7 +309,7 @@ export default defineComponent({
       this.sample = {};
       this.isEdition = false;
       this.isSave = false;
-      this.pictures = [{ linkDrive: "", tituloLink: "" }];
+      this.pictures = [];
       this.btnText = "Salvar amostra";
     },
     openFormSampleReceived(received) {
@@ -479,6 +493,31 @@ export default defineComponent({
   margin-top: 1em;
   display: flex;
   gap: 12px;
+}
+
+.content-btnSave{
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.custom-loader.closeLoaderSave {
+  display: none;
+}
+
+.custom-loader {
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: conic-gradient(#0000 10%, #fafafa);
+  -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 8px), #000 0);
+  animation: s3 1s infinite linear;
+}
+@keyframes s3 {
+  to {
+    transform: rotate(1turn);
+  }
 }
 
 .btn-clear {
