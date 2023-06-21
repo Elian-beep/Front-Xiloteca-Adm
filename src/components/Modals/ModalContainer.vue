@@ -1,14 +1,16 @@
 <template>
   <section class="container" :class="{ showModal: dataShowModal }">
-    <div class="content">
-      <div class="modal-header">
-        <div></div>
-        <MainTitle :text="mainTitle" />
-        <button class="modal-btnClose">
-          <i @click="closeModal" class="fa-solid fa-xmark"></i>
-        </button>
+    <div class="content-between">
+      <div class="content">
+        <div class="modal-header">
+          <div></div>
+          <MainTitle :text="mainTitle" />
+          <button class="modal-btnClose">
+            <i @click="closeModal" class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <slot></slot>
       </div>
-      <slot></slot>
     </div>
   </section>
 </template>
@@ -81,9 +83,11 @@ export default defineComponent({
 }
 
 .content {
+  overflow-y: auto;
   background: #fafafa;
   padding: 24px 16px;
-  max-width: 90vw;
+  max-width: 600px;
+  max-height: 100vh;
 }
 
 .modal-header {

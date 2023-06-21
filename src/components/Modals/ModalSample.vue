@@ -122,6 +122,12 @@ export default defineComponent({
 }
 
 .area-mainTitles p,
+.area-info {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 .area-info p {
   font-weight: 400;
   color: #213140;
@@ -136,12 +142,6 @@ export default defineComponent({
   font-weight: 600;
 }
 
-.area-info {
-  margin-top: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
 
 .area-info p {
   font-size: 14px;
