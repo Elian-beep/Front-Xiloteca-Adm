@@ -221,7 +221,8 @@ export default defineComponent({
             this.tableIsOpen = true;
           });
         } else {
-          this.sampleSearched = this.sampleSearched.filter(sample => sample._id != receivedIdSample);
+          this.sampleSearched.pop(receivedIdSample);
+          //this.sampleSearched = this.sampleSearched.filter(sample => sample._id != receivedIdSample);
           Samples.findSearchPage(`${process.env.VUE_APP_ROUTE_SAMPLE}/${process.env.VUE_APP_ROUTE_PAGE}/${process.env.VUE_APP_ROUTE_SEARCH}?limit=${this.pages.limit}&offset=${this.pages.offset}`, this.sampleSearched).then(
             (response) => {
               this.samples = response.data.results;
