@@ -63,7 +63,6 @@ export default defineComponent({
         linkDrive: "",
       },
       dataOpenModal: false,
-      attSamples: false,
     };
   },
   methods: {
@@ -76,14 +75,12 @@ export default defineComponent({
       await Sample.deleteSample(sample, this.token)
         .then((response) => {
           console.log(response.data);
-          this.attSamples = !this.attSamples;
-          this.$emit("refreshTable", this.attSamples);
+          this.$emit("refreshTable", this.dataSample._id);
           this.closedModal();
         })
         .catch((e) => console.log(e.response.data));
     },
     async removePictures(idSample) {
-      console.log(idSample);
       let pictures = await Pictures.getPictures(idSample);
       await Pictures.deletePictures(pictures.data);
     },

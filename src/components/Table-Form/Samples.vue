@@ -207,12 +207,32 @@ export default defineComponent({
     },
   },
   methods: {
-    attSamples(receivedAttSamples) {
-      if (receivedAttSamples) {
-        if (this.searchInput != "") {
-          this.searchSample();
+    attSamples(receivedIdSample) {
+      if (receivedIdSample) {
+        this.tableIsOpen = false;
+        if (!this.modeSearch) {
+          Samples.findAllPage(`${process.env.VUE_APP_ROUTE_SAMPLE}/${process.env.VUE_APP_ROUTE_PAGE}?limit=${this.pages.limit}&offset=${this.pages.offset}`).then((response) => {
+            this.samples = response.data.results;
+            this.pages.totalSamples = response.data.total;
+            this.pages.offset = response.data.offset;
+            this.pages.previousPage = response.data.previousUrl;
+            this.pages.nextPage = response.data.nextUrl;
+            this.currentPage = this.pages.offset / this.pages.limit + 1;
+            this.tableIsOpen = true;
+          });
         } else {
-          this.listAll();
+          this.sampleSearched = this.sampleSearched.filter(sample => sample._id != receivedIdSample);
+          Samples.findSearchPage(`${process.env.VUE_APP_ROUTE_SAMPLE}/${process.env.VUE_APP_ROUTE_PAGE}/${process.env.VUE_APP_ROUTE_SEARCH}?limit=${this.pages.limit}&offset=${this.pages.offset}`, this.sampleSearched).then(
+            (response) => {
+              this.samples = response.data.results;
+              this.pages.totalSamples = response.data.total;
+              this.pages.offset = response.data.offset;
+              this.pages.previousPage = response.data.previousUrl;
+              this.pages.nextPage = response.data.nextUrl;
+              this.currentPage = this.pages.offset / this.pages.limit + 1;
+              this.tableIsOpen = true;
+            }
+          );
         }
       }
     },
@@ -317,7 +337,7 @@ export default defineComponent({
       // }
       if (this.pages.previousPage) {
         this.tableIsOpen = false;
-        if(!this.modeSearch){
+        if (!this.modeSearch) {
           Samples.findAllPage(this.pages.previousPage).then((response) => {
             this.samples = response.data.results;
             this.pages.totalSamples = response.data.total;
@@ -327,18 +347,19 @@ export default defineComponent({
             this.currentPage = this.pages.offset / this.pages.limit + 1;
             this.tableIsOpen = true;
           });
-        }else{
-          Samples.findSearchPage(this.pages.previousPage, this.sampleSearched).then(
-            (response) => {
-              this.samples = response.data.results;
-              this.pages.totalSamples = response.data.total;
-              this.pages.offset = response.data.offset;
-              this.pages.previousPage = response.data.previousUrl;
-              this.pages.nextPage = response.data.nextUrl;
-              this.currentPage = this.pages.offset / this.pages.limit + 1;
-              this.tableIsOpen = true;
-            }
-          );
+        } else {
+          Samples.findSearchPage(
+            this.pages.previousPage,
+            this.sampleSearched
+          ).then((response) => {
+            this.samples = response.data.results;
+            this.pages.totalSamples = response.data.total;
+            this.pages.offset = response.data.offset;
+            this.pages.previousPage = response.data.previousUrl;
+            this.pages.nextPage = response.data.nextUrl;
+            this.currentPage = this.pages.offset / this.pages.limit + 1;
+            this.tableIsOpen = true;
+          });
         }
       }
     },
@@ -354,16 +375,19 @@ export default defineComponent({
             this.samples = response.data.results;
             this.pages.previousPage = response.data.previousUrl;
             this.pages.nextPage = response.data.nextUrl;
-            this.tableIsOpen = true;
-          });
-        }else{
-          Samples.findSearchPage(urlPage, this.sampleSearched).then(response => {
-            this.samples = response.data.results;
-            this.pages.previousPage = response.data.previousUrl;
-            this.pages.nextPage = response.data.nextUrl;
             this.currentPage = page;
             this.tableIsOpen = true;
-          })
+          });
+        } else {
+          Samples.findSearchPage(urlPage, this.sampleSearched).then(
+            (response) => {
+              this.samples = response.data.results;
+              this.pages.previousPage = response.data.previousUrl;
+              this.pages.nextPage = response.data.nextUrl;
+              this.currentPage = page;
+              this.tableIsOpen = true;
+            }
+          );
         }
       }
     },
