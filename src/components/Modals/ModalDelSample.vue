@@ -72,13 +72,25 @@ export default defineComponent({
     },
     async removeSample(sample) {
       this.removePictures(sample._id);
+      console.log(this.token);
       await Sample.deleteSample(sample, this.token)
         .then((response) => {
           console.log(response.data);
           this.$emit("refreshTable", this.dataSample._id);
           this.closedModal();
         })
-        .catch((e) => console.log(e.response.data));
+        .catch(e => {
+          // console.log(e.response.status)
+          if(e.response.status === 400){
+            console.log('Sessão expirada, por favor, faça login novamente');
+            localStorage.setItem('token', '');
+            this.$router.push({ path: "/" });
+          }
+        });
+      // try{
+      // }catch(error){
+      //   console.log(error);
+      // }
     },
     async removePictures(idSample) {
       let pictures = await Pictures.getPictures(idSample);

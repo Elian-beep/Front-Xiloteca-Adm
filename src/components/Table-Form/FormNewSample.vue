@@ -261,6 +261,7 @@ export default defineComponent({
   methods: {
     SaveSample() {
       if (this.sample.cod) {
+        console.log(this.token);
         this.errorForm = false;
         this.PopulatePictures();
         if (!this.isEdition && this.isSave) {
@@ -277,6 +278,10 @@ export default defineComponent({
               console.log(`${response.data} cadastrado com sucesso`);
             })
             .catch((e) => {
+              if (e.response.status === 400) {
+                localStorage.setItem("token", "");
+                this.$router.push({ path: "/" });
+              }
               this.activeAlert = false;
               this.msgAlert = e.response.data.msg;
               this.activeAlert = true;
@@ -286,11 +291,18 @@ export default defineComponent({
             });
         } else if (this.isEdition) {
           this.closeLoaderSave = false;
-          Samples.editSample(this.sample, this.token).then((response) => {
-            console.log({ res: response.data });
-            this.closeLoaderSave = true;
-            this.ClearInpts();
-          });
+          Samples.editSample(this.sample, this.token)
+            .then((response) => {
+              console.log({ res: response.data });
+              this.closeLoaderSave = true;
+              this.ClearInpts();
+            })
+            .catch((e) => {
+              if (e.response.status === 400) {
+                localStorage.setItem("token", "");
+                this.$router.push({ path: "/" });
+              }
+            });
         }
         if (!this.isSave) {
           this.isSave = true;
@@ -495,7 +507,7 @@ export default defineComponent({
   gap: 12px;
 }
 
-.content-btnSave{
+.content-btnSave {
   display: flex;
   justify-content: center;
   gap: 16px;

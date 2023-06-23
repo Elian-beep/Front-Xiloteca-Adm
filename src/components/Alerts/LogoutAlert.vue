@@ -40,16 +40,19 @@ export default defineComponent({
       this.$emit("closeConfirm", false);
     },
     logOff() {
-      Admin.delToken(this.token)
-        .then((res) => {
-          if (res.status !== 200) {
-            console.log("não excluido");
-          }
-          this.$router.push({ path: "/" });
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      // Admin.delToken(this.token)
+      //   .then((res) => {
+      //     if (res.status !== 200) {
+      //       console.log("não excluido");
+      //     }
+      //     this.$router.push({ path: "/" });
+      //   })
+      //   .catch((error) => {
+        //     console.log(error);
+        //   });
+        localStorage.setItem('token', '');
+        this.$router.push({ path: "/" });
+
     },
   },
   watch:{

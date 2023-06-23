@@ -34,6 +34,7 @@
   
 <script>
 import { defineComponent } from "vue";
+// import { localStorage } from 'localStorage';
 import SubTitle from "../Titles/SubTitle.vue";
 import Admin from "../../services/admin.js";
 import MiniLoading from "../Loadings/MiniLoading.vue";
@@ -66,8 +67,9 @@ export default defineComponent({
           if (!this.token) {
             return console.log("Token não gerado");
           }
+          console.log(response.data);
           // REDIRECIONAMENTO: MUDAR A PÁGINA E ENVIAR JUNTO O TOKEN GERADO
-
+          localStorage.setItem('token', this.token);
           Admin.redirectAdmin(this.token, this.admin._di)
             .then(() => {
               this.$router.push({

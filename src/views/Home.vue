@@ -4,6 +4,7 @@
     :isOpen="receivedIsOpen"
     @closeConfirm="receivedOpenCOnfirm"
   />
+  <!-- //TODO -->
   <Header :tokenKey="tokenKey" @openConfirm="receivedOpenCOnfirm" />
   <Container>
     <ToggleSwitch
@@ -15,14 +16,14 @@
       <div class="cont-samples">
         <Samples
           :openTable="receivedTable"
-          :token="tokenKey.token"
+          :token="tokenKey"
           @isEdit="receivedIsEdit"
           @sampleForEdit="receivedSample"
         />
       </div>
       <div class="cont-form">
         <FormNewSample
-          :token="tokenKey.token"
+          :token="tokenKey"
           :openForm="receivedForm"
           :sampleReceived="sample"
         />
@@ -59,10 +60,11 @@ export default defineComponent({
       receivedForm: false,
       dataIsEdit: false,
       receivedIsOpen: false,
-      tokenKey: {
-        _id: "",
-        token: "",
-      },
+      // tokenKey: {
+      //   _id: "",
+      //   token: "",
+      // },
+      tokenKey: ""
     };
   },
   mounted() {
@@ -73,20 +75,23 @@ export default defineComponent({
       if (!this.$route.query.token) {
         this.$router.push({ path: "/" });
       }
-      Admin.checkAndListToken(this.$route.query.token)
-        .then((res) => {
-          res.data.map((item) => {
-            if (this.$route.query.token == item.token) {
-              this.tokenKey = item;
-            }
-          });
-          // console.log("top, tu ta logado, este é o token: ", this.tokenKey);
-        })
-        .catch((error) => {
-          this.$router.push({ path: "/" });
-          console.log(error.response.data);
-          this.tokenKey = {};
-        });
+      this.tokenKey = this.$route.query.token;
+      console.log(this.tokenKey);
+      // this.tokenKey = this.$route.query.token;
+      // Admin.checkAndListToken(this.$route.query.token)
+      //   .then((res) => {
+      //     res.data.map((item) => {
+      //       if (this.$route.query.token == item.token) {
+      //         this.tokenKey = item;
+      //       }
+      //     });
+      //     // console.log("top, tu ta logado, este é o token: ", this.tokenKey);
+      //   })
+      //   .catch((error) => {
+      //     this.$router.push({ path: "/" });
+      //     console.log(error.response.data);
+      //     this.tokenKey = {};
+      //   });
     },
     receivedShowTable(showTable) {
       this.receivedTable = showTable;
