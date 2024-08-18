@@ -1,9 +1,7 @@
 <template>
+  <SimpleAlert :isActive="activeAlert"> {{ alertMsg }}</SimpleAlert>
   <section class="container" :class="{ openTable: dataOpenTable }">
-    <SearchFormVue
-      @opcInput="receivedOpcInput"
-      @searchInput="receivedSearchInput"
-    />
+    <SearchFormVue @opcInput="receivedOpcInput" @searchInput="receivedSearchInput" />
 
     <!-- ------------------------------- LOOP DE LOADING -->
     <div class="loading-area" :class="{ 'close-loading-area': tableIsOpen }">
@@ -23,9 +21,7 @@
             <th class="inDesktop">Determinador</th>
             <th>
               <div class="btnRefresh">
-                <ButtonLight @click="listAllPage"
-                  ><i class="fa-solid fa-arrows-rotate"></i
-                ></ButtonLight>
+                <ButtonLight @click="listAllPage"><i class="fa-solid fa-arrows-rotate"></i></ButtonLight>
               </div>
             </th>
           </tr>
@@ -50,16 +46,10 @@
             </td>
             <td>
               <div class="table-actions">
-                <button
-                  @click="sendEditSample(sample)"
-                  class="table-action act-edit"
-                >
+                <button @click="sendEditSample(sample)" class="table-action act-edit">
                   <i class="fa-solid fa-pen"></i>
                 </button>
-                <button
-                  @click="openModalDelSample(sample)"
-                  class="table-action act-del"
-                >
+                <button @click="openModalDelSample(sample)" class="table-action act-del">
                   <i class="fa-solid fa-trash"></i>
                 </button>
               </div>
@@ -75,34 +65,19 @@
         <i class="fa-solid fa-chevron-left"></i>
       </button>
       <div class="pag-numbers">
-        <span
-          v-for="page in pagesToShow"
-          :key="page"
-          @click="goToPage(page)"
-          class="pag-number"
-          :class="{ 'current-page': currentPage === page }"
-          >{{ page }}</span
-        >
+        <span v-for="page in pagesToShow" :key="page" @click="goToPage(page)" class="pag-number"
+          :class="{ 'current-page': currentPage === page }">{{ page }}</span>
       </div>
       <button class="pag-btn-action" @click="nextPage">
         <i class="fa-solid fa-chevron-right"></i>
       </button>
     </div>
   </section>
-  <ModalSample
-    @closeModal="closedModal"
-    :openModal="openModal"
-    :sample="sample"
-  />
-  <ModalDelSample
-    @closeModal="closedModalDelSample"
-    @refreshTable="attSamples"
-    :openModal="openModalDel"
-    :sample="sample"
-    :token="token"
-  />
+  <ModalSample @closeModal="closedModal" :openModal="openModal" :sample="sample" />
+  <ModalDelSample @closeModal="closedModalDelSample" @refreshTable="attSamples" :openModal="openModalDel"
+    :sample="sample" :token="token" />
 </template>
-  
+
 <script>
 import { defineComponent } from "vue";
 import CircleLoading from "../Loadings/Loading.vue";
@@ -112,6 +87,7 @@ import ModalDelSample from "../Modals/ModalDelSample.vue";
 import ButtonLight from "../Form/ButtonLight.vue";
 import SearchSample from "../../services/searchSample.js";
 import SearchFormVue from "../Form/SearchForm.vue";
+import SimpleAlert from '../Alerts/SimpleAlert.vue';
 
 export default defineComponent({
   name: "tableSamples",
@@ -121,6 +97,7 @@ export default defineComponent({
     ModalSample,
     ModalDelSample,
     ButtonLight,
+    SimpleAlert,
   },
   emits: ["isEdit", "sampleForEdit"],
   props: {
@@ -150,6 +127,8 @@ export default defineComponent({
         remetente: "",
         desc: "",
         obs: "",
+        activeAlert: false,
+        alertMsg: ""
       },
       samples: [],
       sampleSearched: [],
@@ -269,15 +248,22 @@ export default defineComponent({
         allSamples,
         this.opcInput
       );
-      console.log(this.sampleSearched);
       Samples.findSearchPage("amostras/page/busca", this.sampleSearched).then(
         (response) => {
-          this.samples = response.data.results;
-          this.pages.totalSamples = response.data.total;
-          this.pages.offset = response.data.offset;
-          this.pages.previousPage = response.data.previousUrl;
-          this.pages.nextPage = response.data.nextUrl;
-          this.tableIsOpen = true;
+          console.log('Response com erro', response);
+          if (response.data.results && response.data.results.length > 0) {
+            this.samples = response.data.results;
+            this.pages.totalSamples = response.data.total;
+            this.pages.offset = response.data.offset;
+            this.pages.previousPage = response.data.previousUrl;
+            this.pages.nextPage = response.data.nextUrl;
+            this.tableIsOpen = true;
+          } else {
+            console.log(response.data.message);
+            this.alertMsg = response.data.message;
+            this.activeAlert = !this.activeAlert;
+            this.tableIsOpen = true;
+          }
         }
       );
       this.currentPage = 1;
@@ -422,11 +408,12 @@ export default defineComponent({
   },
 });
 </script>
-  
+
 <style scoped>
 .container {
   display: none;
 }
+
 .container.openTable {
   display: block;
 }
@@ -472,7 +459,7 @@ export default defineComponent({
   color: #213140;
 }
 
-.tableSample thead t > {
+.tableSample thead t> {
   padding-left: 10px;
 }
 
@@ -503,7 +490,7 @@ export default defineComponent({
   /* margin-left: 10px; */
 }
 
-.tableSample tbody tr:hover > td {
+.tableSample tbody tr:hover>td {
   background: rgba(33, 49, 64, 0.75);
   color: #fafafa;
 }
@@ -533,6 +520,7 @@ export default defineComponent({
   gap: 15px;
   padding-top: 1.5em;
 }
+
 .pag-area.show {
   display: flex;
 }
@@ -551,6 +539,7 @@ export default defineComponent({
   font-weight: 400;
   color: #999898;
 }
+
 .current-page {
   font-weight: bold;
   color: #213140;
@@ -579,7 +568,7 @@ export default defineComponent({
     font-size: 16px;
   }
 
-  .tableSample thead t > {
+  .tableSample thead t> {
     padding-left: 12px;
   }
 
@@ -588,7 +577,7 @@ export default defineComponent({
     justify-content: end;
   }
 
-  .tableSample tbody t > {
+  .tableSample tbody t> {
     padding-left: 12px;
   }
 
@@ -617,17 +606,21 @@ export default defineComponent({
   .inLaptop {
     display: table-cell;
   }
+
   .table-actions {
     gap: 18px;
   }
+
   .act-edit i,
   .act-del i {
     transition: color 0.2s ease-in-out;
   }
+
   .act-edit:hover i {
     cursor: pointer;
     color: #8ad547;
   }
+
   .act-del:hover i {
     cursor: pointer;
     color: #be3737;
@@ -647,6 +640,7 @@ export default defineComponent({
   .pag-number {
     transition: color 0.2s ease-in-out;
   }
+
   .pag-number:hover {
     color: rgba(33, 49, 64, 1);
     cursor: pointer;
